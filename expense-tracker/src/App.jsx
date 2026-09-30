@@ -1,8 +1,7 @@
 import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
+
 import './App.css'
+import ExpenseList from './ExpenseList'
 
 function App() {
  const [entries ,setEntries]=useState([
@@ -12,12 +11,11 @@ function App() {
   {id: 4, description:"Doğal gaz", amount:900, type:"expense", category: "Bill"},
  ])
 
+
   return (
     <>
     <div>
-      {entries.map((entry)=>(
-        <p key={entry.id}>{entry.description}--- {entry.amount}</p>
-      ))}
+    <ExpenseList entries={entries} />
     </div>
     </>
   )
