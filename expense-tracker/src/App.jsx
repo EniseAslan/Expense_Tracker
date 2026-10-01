@@ -12,6 +12,14 @@ function App() {
   {id: 4, description:"Doğal gaz", amount:900, type:"expense", category: "Bill"},
  ])
 
+ const [filter,setFilter]=useState("all")
+
+ const filterEntries=entries.filter((entry)=>{
+  if(filter==="income") return entry.type ==="income"
+  if(filter==="expense") return entry.type === "expense"
+  return true
+ })
+
  const [form, setForm] = useState({ description: "", amount: "", type: "income", category: "" })
 function handleAdd(entry) {
   setEntries((prev) => [...prev, { id: Date.now(), ...entry, amount: Number(entry.amount) }])
@@ -32,20 +40,28 @@ const expense = entries
 const balance = income - expense
 
   return (
-    <>
-    <div className="flex gap-4 my-4">
-  <p>Gelir: {income}</p>
-  <p>Gider: {expense}</p>
-  <p>Bakiye: {balance}</p>
-</div>
-    <div>
+  <div className="min-h-screen bg-gray-50 p-6">
+    <div className="max-w-2xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Expense Tracker</h1>
 
+      <ExpenseForm form={form} onChange={setForm} onAdd={handleAdd} />
 
-    <ExpenseList entries={entries} onDelete={handleDelete} />
-    <ExpenseForm form={form} onChange={setForm} onAdd={handleAdd} />
+      <div className="flex gap-4 my-4 bg-white p-4 rounded shadow">
+        <p>Gelir: {income}</p>
+        <p>Gider: {expense}</p>
+        <p>Bakiye: {balance}</p>
+      </div>
+
+      <div className="flex gap-2 mb-4">
+        <button onClick={() => setFilter("all")} className="px-3 py-1 rounded bg-gray-200">Tümü</button>
+        <button onClick={() => setFilter("income")} className="px-3 py-1 rounded bg-gray-200">Gelir</button>
+        <button onClick={() => setFilter("expense")} className="px-3 py-1 rounded bg-gray-200">Gider</button>
+      </div>
+
+      <ExpenseList entries={filterEntries} onDelete={handleDelete} />
     </div>
-    </>
-  )
+  </div>
+)
 }
 
 export default App
