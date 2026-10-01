@@ -21,9 +21,26 @@ function handleDelete(id){
   setEntries((prev)=>prev.filter((entry)=>entry.id !==id));
 }
 
+const income = entries
+  .filter((entry) => entry.type === "income")
+  .reduce((sum, entry) => sum + entry.amount, 0)
+
+const expense = entries
+  .filter((entry) => entry.type === "expense")
+  .reduce((sum, entry) => sum + entry.amount, 0)
+
+const balance = income - expense
+
   return (
     <>
+    <div className="flex gap-4 my-4">
+  <p>Gelir: {income}</p>
+  <p>Gider: {expense}</p>
+  <p>Bakiye: {balance}</p>
+</div>
     <div>
+
+
     <ExpenseList entries={entries} onDelete={handleDelete} />
     <ExpenseForm form={form} onChange={setForm} onAdd={handleAdd} />
     </div>
