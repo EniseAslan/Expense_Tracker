@@ -16,10 +16,15 @@ function App() {
 function handleAdd(entry) {
   setEntries((prev) => [...prev, { id: Date.now(), ...entry, amount: Number(entry.amount) }])
 }
+
+function handleDelete(id){
+  setEntries((prev)=>prev.filter((entry)=>entry.id !==id));
+}
+
   return (
     <>
     <div>
-    <ExpenseList entries={entries} />
+    <ExpenseList entries={entries} onDelete={handleDelete} />
     <ExpenseForm form={form} onChange={setForm} onAdd={handleAdd} />
     </div>
     </>
