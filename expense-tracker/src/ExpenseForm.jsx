@@ -1,7 +1,9 @@
 import { useState } from "react"
 
-function ExpenseForm({ form, onChange, onAdd }) {
+function ExpenseForm({ form, onChange, onAdd, onUpdate, onCancel, editingId }) {
   const [error, setError] = useState("")
+
+  const isEditing = editingId !== null
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -24,8 +26,13 @@ function ExpenseForm({ form, onChange, onAdd }) {
     }
 
     setError("")
-    onAdd({ ...form, description, category, amount })
-    onChange({ description: "", amount: "", type: "income", category: "" })
+    const payload = { ...form, description, category, amount }
+
+    if (isEditing) {
+      onUpdate(payload)
+    } else {
+      onAdd(payload)
+    }
   }
 
   return (
@@ -61,9 +68,21 @@ function ExpenseForm({ form, onChange, onAdd }) {
         onChange={(e) => onChange({ ...form, category: e.target.value })}
         className="border border-gray-400 rounded px-2 py-1"
       />
-      <button type="submit" className="bg-blue-500 text-white px-4 py-1 rounded">
-        Ekle
+      <button
+        type="submit"
+        className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 cursor-pointer"
+      >
+        {isEditing ? "Güncelle" : "Ekle"}
       </button>
+      {isEditing && (
+        <button
+          type="button"
+          onClick={onCancel}
+          className="bg-gray-400 text-white px-4 py-1 rounded hover:bg-gray-500 cursor-pointer"
+        >
+          İptal
+        </button>
+      )}
       {error && <p className="w-full text-red-600 text-sm">{error}</p>}
     </form>
   )

@@ -1,67 +1,139 @@
-import { useState } from 'react'
+import { useEffect, useState } from "react";
 
-import './App.css'
-import ExpenseList from './ExpenseList'
-import ExpenseForm from './ExpenseForm'
+import "./App.css";
+import ExpenseList from "./ExpenseList";
+import ExpenseForm from "./ExpenseForm";
+import { formatCurrency, loadEntries, STORAGE_KEY } from "./utils";
 
 function App() {
- const [entries ,setEntries]=useState([
-    { id: 1, description: "Maaş", amount: 15000, type: "income", category: "Salary" },
-  { id: 2, description: "Market", amount: 1000, type: "expense", category: "Food" },
-  { id: 3, description: "Kira", amount: 6000, type: "expense", category: "Housing" },
-  {id: 4, description:"Doğal gaz", amount:900, type:"expense", category: "Bill"},
- ])
+  const [entries, setEntries] = useState(loadEntries);
+  const [editingId, setEditingId] = useState(null);
+  const [filter, setFilter] = useState("all");
+  const [form, setForm] = useState({
+    description: "",
+    amount: "",
+    type: "income",
+    category: "",
+  });
 
- const [filter,setFilter]=useState("all")
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  }, [entries]);
 
- const filterEntries=entries.filter((entry)=>{
-  if(filter==="income") return entry.type ==="income"
-  if(filter==="expense") return entry.type === "expense"
-  return true
- })
+  const filterEntries = entries.filter((entry) => {
+    if (filter === "income") return entry.type === "income";
+    if (filter === "expense") return entry.type === "expense";
+    return true;
+  });
 
- const [form, setForm] = useState({ description: "", amount: "", type: "income", category: "" })
-function handleAdd(entry) {
-  setEntries((prev) => [...prev, { id: Date.now(), ...entry, amount: Number(entry.amount) }])
-}
+  function handleAdd(entry) {
+    setEntries((prev) => [
+      ...prev,
+      { id: Date.now(), ...entry, amount: Number(entry.amount) },
+    ]);
+    setForm({ description: "", amount: "", type: "income", category: "" });
+  }
 
-function handleDelete(id){
-  setEntries((prev)=>prev.filter((entry)=>entry.id !==id));
-}
+  function handleDelete(id) {
+    setEntries((prev) => prev.filter((entry) => entry.id !== id));
+  }
 
-const income = entries
-  .filter((entry) => entry.type === "income")
-  .reduce((sum, entry) => sum + entry.amount, 0)
+  function handleEdit(entry) {
+    setEditingId(entry.id);
+    setForm({
+      description: entry.description,
+      amount: String(entry.amount),
+      type: entry.type,
+      category: entry.category,
+    });
+  }
 
-const expense = entries
-  .filter((entry) => entry.type === "expense")
-  .reduce((sum, entry) => sum + entry.amount, 0)
+  function handleUpdate(entry) {
+    setEntries((prev) =>
+      prev.map((e) =>
+        e.id === editingId
+          ? { ...e, ...entry, amount: Number(entry.amount) }
+          : e,
+      ),
+    );
+    handleCancel();
+  }
 
-const balance = income - expense
+  function handleCancel() {
+    setEditingId(null);
+    setForm({ description: "", amount: "", type: "income", category: "" });
+  }
+
+  const income = entries
+    .filter((entry) => entry.type === "income")
+    .reduce((sum, entry) => sum + entry.amount, 0);
+
+  const expense = entries
+    .filter((entry) => entry.type === "expense")
+    .reduce((sum, entry) => sum + entry.amount, 0);
+
+  const balance = income - expense;
 
   return (
-  <div className="min-h-screen bg-gray-50 p-6">
-    <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Expense Tracker</h1>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-2xl mx-auto">
+        <h1 className="text-2xl font-bold mb-4">Expense Tracker</h1>
 
-      <ExpenseForm form={form} onChange={setForm} onAdd={handleAdd} />
+        <ExpenseForm
+          key={editingId ?? "new"}
+          form={form}
+          onChange={setForm}
+          onAdd={handleAdd}
+          onUpdate={handleUpdate}
+          onCancel={handleCancel}
+          editingId={editingId}
+        />
 
-      <div className="flex gap-4 my-4 bg-white p-4 rounded shadow">
-        <p>Gelir: {income}</p>
-        <p>Gider: {expense}</p>
-        <p>Bakiye: {balance}</p>
+        <div className="flex gap-4 my-4 bg-white p-4 rounded shadow">
+          <p className="font-medium text-green-600">
+            Gelir: {formatCurrency(income)}
+          </p>
+          <p className="font-medium text-red-600">
+            Gider: {formatCurrency(expense)}
+          </p>
+          <p
+            className={`font-bold ${
+              balance >= 0 ? "text-green-700" : "text-red-700"
+            }`}
+          >
+            Bakiye: {formatCurrency(balance)}
+          </p>
+        </div>
+
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => setFilter("all")}
+            className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 cursor-pointer"
+          >
+            Tümü
+          </button>
+          <button
+            onClick={() => setFilter("income")}
+            className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 cursor-pointer"
+          >
+            Gelir
+          </button>
+          <button
+            onClick={() => setFilter("expense")}
+            className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 cursor-pointer"
+          >
+            Gider
+          </button>
+        </div>
+
+        <ExpenseList
+          entries={filterEntries}
+          onDelete={handleDelete}
+          onEdit={handleEdit}
+        />
       </div>
-
-      <div className="flex gap-2 mb-4">
-        <button onClick={() => setFilter("all")} className="px-3 py-1 rounded bg-gray-200">Tümü</button>
-        <button onClick={() => setFilter("income")} className="px-3 py-1 rounded bg-gray-200">Gelir</button>
-        <button onClick={() => setFilter("expense")} className="px-3 py-1 rounded bg-gray-200">Gider</button>
-      </div>
-
-      <ExpenseList entries={filterEntries} onDelete={handleDelete} />
     </div>
-  </div>
-)
+  );
 }
 
-export default App
+export default App;

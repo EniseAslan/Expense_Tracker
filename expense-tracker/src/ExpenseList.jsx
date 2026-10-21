@@ -1,9 +1,15 @@
 import ExpenseItem from "./ExpenseItem"
-function ExpenseList({ entries, onDelete}) {
+
+function ExpenseList({ entries, onDelete, onEdit }) {
   return (
     <div>
       {entries.map((entry) => (
-        <ExpenseItem key={entry.id} entry={entry} onDelete={onDelete} />
+        <ExpenseItem
+          key={entry.id}
+          entry={entry}
+          onDelete={onDelete}
+          onEdit={onEdit}
+        />
       ))}
     </div>
   )
