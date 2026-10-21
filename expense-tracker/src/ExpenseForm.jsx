@@ -1,6 +1,28 @@
+import { useState } from "react"
+
 function ExpenseForm({ form, onChange, onAdd }) {
+  const [error, setError] = useState("")
+
   function handleSubmit() {
-    onAdd(form)
+    const description = form.description.trim()
+    const category = form.category.trim()
+    const amount = Number(form.amount)
+
+    if (!description) {
+      setError("Açıklama boş olamaz.")
+      return
+    }
+    if (form.amount === "" || !Number.isFinite(amount) || amount <= 0) {
+      setError("Tutar 0'dan büyük bir sayı olmalı.")
+      return
+    }
+    if (!category) {
+      setError("Kategori boş olamaz.")
+      return
+    }
+
+    setError("")
+    onAdd({ ...form, description, category, amount })
     onChange({ description: "", amount: "", type: "income", category: "" })
   }
 
@@ -15,6 +37,8 @@ function ExpenseForm({ form, onChange, onAdd }) {
       />
       <input
         type="number"
+        min="0"
+        step="0.01"
         placeholder="Tutar"
         value={form.amount}
         onChange={(e) => onChange({ ...form, amount: e.target.value })}
@@ -38,6 +62,7 @@ function ExpenseForm({ form, onChange, onAdd }) {
       <button onClick={handleSubmit} className="bg-blue-500 text-white px-4 py-1 rounded">
         Ekle
       </button>
+      {error && <p className="w-full text-red-600 text-sm">{error}</p>}
     </div>
   )
 }
