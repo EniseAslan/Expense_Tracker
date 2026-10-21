@@ -3,7 +3,9 @@ import { useState } from "react"
 function ExpenseForm({ form, onChange, onAdd }) {
   const [error, setError] = useState("")
 
-  function handleSubmit() {
+  function handleSubmit(e) {
+    e.preventDefault()
+
     const description = form.description.trim()
     const category = form.category.trim()
     const amount = Number(form.amount)
@@ -27,7 +29,7 @@ function ExpenseForm({ form, onChange, onAdd }) {
   }
 
   return (
-    <div className="flex gap-2 flex-wrap">
+    <form onSubmit={handleSubmit} className="flex gap-2 flex-wrap">
       <input
         type="text"
         placeholder="Açıklama"
@@ -59,11 +61,11 @@ function ExpenseForm({ form, onChange, onAdd }) {
         onChange={(e) => onChange({ ...form, category: e.target.value })}
         className="border border-gray-400 rounded px-2 py-1"
       />
-      <button onClick={handleSubmit} className="bg-blue-500 text-white px-4 py-1 rounded">
+      <button type="submit" className="bg-blue-500 text-white px-4 py-1 rounded">
         Ekle
       </button>
       {error && <p className="w-full text-red-600 text-sm">{error}</p>}
-    </div>
+    </form>
   )
 }
 
